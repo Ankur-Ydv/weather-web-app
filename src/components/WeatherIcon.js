@@ -10,6 +10,7 @@ import {
   WiSnow,
   WiNightCloudy,
   WiNightFog,
+  WiNightClear,
   WiNightStormShowers,
   WiNightThunderstorm,
 } from "react-icons/wi";

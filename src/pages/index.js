@@ -1,36 +1,157 @@
 import { useState } from "react";
 import axios from "axios";
 import { BiSearch, BiReset } from "react-icons/bi";
-import { BsToggle2On, BsToggle2Off } from "react-icons/bs";
 import WeatherApp from "@/components/WeatherApp";
 import Toggle from "@/components/Toggle";
+import { Hint } from "react-autocomplete-hint";
+
+const HintCities = [
+  // Indian Cities
+  "Mumbai",
+  "Delhi",
+  "Bengaluru",
+  "Hyderabad",
+  "Ahmedabad",
+  "Chennai",
+  "Kolkata",
+  "Pune",
+  "Jaipur",
+  "Surat",
+  "Lucknow",
+  "Kanpur",
+  "Nagpur",
+  "Patna",
+  "Indore",
+  "Thane",
+  "Bhopal",
+  "Visakhapatnam",
+  "Vadodara",
+  "Firozabad",
+  "Ludhiana",
+  "Rajkot",
+  "Agra",
+  "Siliguri",
+  "Nashik",
+  "Faridabad",
+  "Patiala",
+  "Meerut",
+  "Kalyan-Dombivali",
+  "Vasai-Virar",
+  "Varanasi",
+  "Srinagar",
+  "Dhanbad",
+  "Jodhpur",
+  "Amritsar",
+  "Raipur",
+  "Allahabad",
+  "Coimbatore",
+  "Jabalpur",
+  "Gwalior",
+  "Vijayawada",
+  "Madurai",
+  "Guwahati",
+  "Chandigarh",
+  "Hubli-Dharwad",
+  "Amroha",
+  "Moradabad",
+  "Gurgaon",
+  "Aligarh",
+  "Solapur",
+  "Ranchi",
+
+  // Other Cities
+  "New York",
+  "London",
+  "Paris",
+  "Tokyo",
+  "Sydney",
+  "Berlin",
+  "Moscow",
+  "Dubai",
+  "Singapore",
+  "Toronto",
+  "Rome",
+  "Amsterdam",
+  "Seoul",
+  "Barcelona",
+  "Istanbul",
+  "Los Angeles",
+  "Rio de Janeiro",
+  "Cairo",
+  "Cape Town",
+  "Bangkok",
+  "Athens",
+  "Vienna",
+  "Munich",
+  "Prague",
+  "Stockholm",
+  "Beijing",
+  "Shanghai",
+  "Hong Kong",
+  "Dublin",
+  "Helsinki",
+  "Zurich",
+  "Lisbon",
+  "Oslo",
+  "Buenos Aires",
+  "São Paulo",
+  "Mexico City",
+  "Toronto",
+  "Vancouver",
+  "Montreal",
+  "Sydney",
+  "Melbourne",
+  "Auckland",
+  "Wellington",
+  "Cape Town",
+  "Johannesburg",
+  "Nairobi",
+];
 
 const Home = () => {
-  const [postalCode, setPostalCode] = useState("");
-  const [city, setCity] = useState("");
+  const [search, setSearch] = useState("");
+  const [msg, setMsg] = useState("Search Now!");
   const [data, setData] = useState(null);
   const [searching, setSearching] = useState(false);
 
+  function isAlphabeticString(str) {
+    return /^[A-Za-z]+$/.test(str);
+  }
+
+  function isNumericString(str) {
+    return /^\d+$/.test(str);
+  }
+  const handleValidation = () => {
+    if (search === "") {
+      setMsg("Invalid Request!");
+      return false;
+    } else if (!isAlphabeticString(search) && !isNumericString(search)) {
+      setMsg("Invalid Request!");
+      return false;
+    }
+    return true;
+  };
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(postalCode, city);
-    if (postalCode !== "" || city !== "") {
+    console.log(search);
+    if (handleValidation()) {
       try {
         setSearching(true);
-        const response = await axios.get(
-          `https://api.weatherbit.io/v2.0/current?city=${city}&postal_code=${postalCode}&key=51c0e4541707423c9adc586dda5bfda5&include=minutely`
-        );
+        const API_URL = isAlphabeticString(search)
+          ? `https://api.weatherbit.io/v2.0/current?city=${search}&key=51c0e4541707423c9adc586dda5bfda5&include=minutely`
+          : `https://api.weatherbit.io/v2.0/current?postal_code=${search}&key=51c0e4541707423c9adc586dda5bfda5&include=minutely`;
+        const response = await axios.get(API_URL);
         if (response.status === 200) {
           setData(response.data.data[0]);
-          setSearching(false);
         }
       } catch (error) {
         console.log(error);
+        setMsg("Server Error");
       }
+      setSearching(false);
     } else {
-      console.log("Invalid Search");
+      setMsg("Invalid Request!");
     }
-    event.target.reset();
   };
 
   return (
@@ -54,42 +175,22 @@ const Home = () => {
 
           <input
             type="text"
-            list="codes"
-            className="w-full py-1 px-2 bg-transparent border-b-2 border-black dark:border-darkMode-txt outline-none dark:text-darkMode-txt"
-            placeholder="Enter Postal Code"
-            onChange={(e) => setPostalCode(e.target.value)}
+            className="w-full flex py-1 px-3 bg-transparent border-b-2 border-black dark:border-darkMode-txt outline-none dark:text-darkMode-txt "
+            placeholder="Enter Postal Code or City"
+            autoComplete="on"
+            list="options"
+            onChange={(e) => setSearch(e.target.value)}
           />
 
-          <datalist id="codes">
-            <option value="110091" />
-            <option value="110092" />
-            <option value="110094" />
-            <option value="110096" />
-            <option value="201301" />
-            <option value="233301" />
-            <option value="213401" />
-          </datalist>
-
-          <span className="text-5xl dark:text-white">.</span>
-
-          <input
-            type="text"
-            list="cities"
-            className="w-full py-1 px-2 bg-transparent border-b-2 border-black dark:border-darkMode-txt outline-none dark:text-darkMode-txt"
-            placeholder="Enter City"
-            onChange={(e) => setCity(e.target.value)}
-          />
-
-          <datalist id="cities">
-            <option value="Delhi" />
-            <option value="Noida" />
-            <option value="Mumbai" />
-            <option value="Kolkata" />
-            <option value="Bangalore" />
-            <option value="Pune" />
-            <option value="Jaipur" />
-            <option value="Shimla" />
-          </datalist>
+          {search.length > 2 ? (
+            <datalist id="options">
+              {HintCities.map((city) => {
+                return <option value={city} />;
+              })}
+            </datalist>
+          ) : (
+            <></>
+          )}
 
           <button type="submit" className="text-2xl font-bold dark:text-white">
             <BiSearch />
@@ -124,10 +225,8 @@ const Home = () => {
           ) : (
             <>
               <div className="flex flex-col items-center">
-                <div className="text-2xl dark:text-darkMode-txt">Search</div>
-                <div className="text-2xl dark:text-darkMode-txt">&</div>
-                <div className="text-2xl dark:text-darkMode-txt">
-                  View Current Weather
+                <div className="text-2xl font-serif dark:text-darkMode-txt">
+                  {msg}
                 </div>
               </div>
             </>
