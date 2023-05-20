@@ -36,5 +36,5 @@ a {
 }
 
 body * {
-  @apply transition-colors duration-100;
+  @apply transition-colors duration-75;
 }
